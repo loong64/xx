@@ -7,7 +7,7 @@ variable "TEST_BASE_TYPE" {
 }
 
 variable "TEST_BASE_IMAGE" {
-    default = TEST_BASE_TYPE == "alpine" ? "alpine:3.20" : TEST_BASE_TYPE == "debian" ? "debian:bookworm" : null
+    default = TEST_BASE_TYPE == "alpine" ? "alpine:3.20" : TEST_BASE_TYPE == "debian" ? "debian:trixie" : null
 }
 
 variable "DEV_SDK_PLATFORM" {
@@ -33,7 +33,7 @@ target "test-debian" {
     inherits = ["test-src"]
     args = {
         TEST_BASE_TYPE = "debian"
-        TEST_BASE_IMAGE = "debian:bookworm"
+        TEST_BASE_IMAGE = "debian:trixie"
     }
 }
 
@@ -130,6 +130,7 @@ target "_all-platforms" {
         "linux/arm/v5",
         "linux/arm/v6",
         "linux/arm/v7",
+        "linux/loong64",
         "linux/mips",
         "linux/mipsle",
         "linux/mips64",
@@ -164,6 +165,7 @@ target "sdk-extras" {
         "linux/arm/v5",
         "linux/arm/v6",
         "linux/arm/v7",
+        "linux/loong64",
         "linux/mips",
         "linux/mipsle",
         "linux/mips64",
@@ -214,6 +216,7 @@ target "binutils" {
             "linux-arm64",
             "linux-armv6",
             "linux-armv7",
+            "linux-loong64",
             "linux-ppc64le",
             "linux-riscv64",
             "linux-s390x",
@@ -264,6 +267,7 @@ target "ld-static-tgz" {
             "linux-arm64",
             "linux-armv6",
             "linux-armv7",
+            "linux-loong64",
             "linux-ppc64le",
             "linux-riscv64",
             "linux-s390x",
