@@ -1,5 +1,5 @@
 variable "XX_REPO" {
-    default = "tonistiigi/xx"
+    default = "ghcr.io/loong64/xx"
 }
 
 variable "TEST_BASE_TYPE" {
@@ -7,7 +7,7 @@ variable "TEST_BASE_TYPE" {
 }
 
 variable "TEST_BASE_IMAGE" {
-    default = TEST_BASE_TYPE == "alpine" ? "alpine:3.20" : TEST_BASE_TYPE == "debian" ? "debian:bookworm" : null
+    default = TEST_BASE_TYPE == "alpine" ? "alpine:3.21" : TEST_BASE_TYPE == "debian" ? "debian:trixie" : null
 }
 
 variable "DEV_SDK_PLATFORM" {
@@ -33,7 +33,7 @@ target "test-debian" {
     inherits = ["test-src"]
     args = {
         TEST_BASE_TYPE = "debian"
-        TEST_BASE_IMAGE = "debian:bookworm"
+        TEST_BASE_IMAGE = "debian:trixie"
     }
 }
 
@@ -136,7 +136,8 @@ target "_all-platforms" {
         "linux/mips64le",
         "linux/ppc64le",
         "linux/s390x",
-        "linux/riscv64"
+        "linux/riscv64",
+        "linux/loong64"
     ]
 }
 
@@ -171,6 +172,7 @@ target "sdk-extras" {
         "linux/ppc64le",
         "linux/riscv64",
         "linux/s390x",
+        "linux/loong64",
         "windows/386",
         "windows/amd64",
         "windows/arm",
@@ -186,7 +188,7 @@ target "sdk-extras-dev" {
 target "_ld-base" {
     context = "src/ld"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
     }
 }
 
@@ -214,6 +216,7 @@ target "binutils" {
             "linux-arm64",
             "linux-armv6",
             "linux-armv7",
+            "linux-loong64",
             "linux-ppc64le",
             "linux-riscv64",
             "linux-s390x",
@@ -264,6 +267,7 @@ target "ld-static-tgz" {
             "linux-arm64",
             "linux-armv6",
             "linux-armv7",
+            "linux-loong64",
             "linux-ppc64le",
             "linux-riscv64",
             "linux-s390x",
@@ -293,7 +297,7 @@ target "ld-static-tgz" {
 target "compiler-rt" {
     context = "src/llvm"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
     }
     target = "compiler-rt"
     platforms = [
@@ -305,7 +309,7 @@ target "compiler-rt" {
 target "libcxx" {
     context = "src/llvm"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
     }
     target = "libcxx"
     platforms = [
@@ -318,7 +322,7 @@ target "dev" {
     context = "src"
     target = "dev"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
         "sdk-extras" = DEV_SDK_PLATFORM != null ? "target:sdk-extras-dev" : "docker-image://scratch"
         "ld64" = DEV_WITH_LD64 != "" ? "target:ld64" : "docker-image://scratch"
     }
@@ -336,7 +340,7 @@ target "lipo" {
     context = "src/ld"
     target = "lipo-static"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
     }
     platforms = [
         "linux/amd64",
@@ -349,7 +353,7 @@ target "sigtool" {
     context = "src/ld"
     target = "sigtool-static"
     contexts = {
-        "tonistiigi/xx" = "target:xx"
+        "ghcr.io/loong64/xx" = "target:xx"
     }
     platforms = [
         "linux/amd64",

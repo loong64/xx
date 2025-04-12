@@ -1,9 +1,9 @@
 #syntax=docker/dockerfile:1.8
 #check=error=true
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+FROM --platform=$BUILDPLATFORM ghcr.io/loong64/xx AS xx
 
-FROM --platform=$BUILDPLATFORM alpine AS compiler-rt-build
+FROM --platform=$BUILDPLATFORM registry.alpinelinux.org/img/alpine AS compiler-rt-build
 RUN apk add --no-cache git cmake clang lld make ninja python3 llvm
 WORKDIR /work
 COPY --from=xx / /
@@ -20,7 +20,7 @@ RUN mkdir build && cd build && \
 FROM scratch AS compiler-rt
 COPY --from=compiler-rt-build /out /usr/lib/clang/compiler-rt/
 
-FROM --platform=$BUILDPLATFORM alpine AS libcxx-build
+FROM --platform=$BUILDPLATFORM registry.alpinelinux.org/img/alpine AS libcxx-build
 RUN apk add --no-cache git cmake clang lld make ninja python3 binutils
 WORKDIR /work
 COPY --from=xx / /
