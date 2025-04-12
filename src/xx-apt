@@ -89,6 +89,20 @@ case "${TARGETARCH}" in
       esac
     fi
     ;;
+  loong*)
+    case "${XX_VENDOR}" in
+      debian)
+        if [ "$(cut -d. -f 1 /etc/debian_version)" -lt 13 ]; then
+          echo >&2 "skipping packages installation on ${XX_ARCH}. loong64 requires debian 13+"
+          exit 0
+        fi
+        ;;
+      ubuntu)
+        echo >&2 "skipping packages installation on ${XX_ARCH}"
+        exit 0
+        ;;
+    esac
+    ;;
   *) ;;
 esac
 
@@ -204,6 +218,12 @@ if [ "$TARGETARCH" = "riscv64" ] && [ "$(xx-info vendor)" = "debian" ]; then
   echo "deb [ arch=riscv64 ] http://ftp.ports.debian.org/debian-ports sid main" >>/etc/apt/sources.list.d/riscv64-sid.list
 fi
 
+if [ "$TARGETARCH" = "loong64" ] && [ "$(xx-info vendor)" = "debian" ]; then
+  apt-get update
+  apt-get install -y debian-ports-archive-keyring
+  echo "deb [ arch=loong64 ] http://ftp.ports.debian.org/debian-ports sid main" >>/etc/apt/sources.list.d/loong64-sid.list
+fi
+
 if ! dpkg --print-foreign-architectures | grep "$XX_PKG_ARCH" >/dev/null; then
   if [ "$XX_OS" = "linux" ]; then
     if [ "$(xx-info vendor)" = "ubuntu" ] && [ -z "$nocross" ]; then
@@ -230,7 +250,7 @@ if [ "$XX_OS" = "windows" ]; then
   esac
 fi
 
-gccvers="12 11 10 9"
+gccvers="14 13 12 11 10 9"
 packages2=
 for p in ${packages}; do
   if [ "${p}" = "xx-c-essentials" ]; then

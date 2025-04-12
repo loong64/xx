@@ -1,5 +1,5 @@
 variable "TARGET_REPO" {
-    default = "tonistiigi/bats-assert"
+    default = "ghcr.io/loong64/tonistiigi/bats-assert"
 }
 
 target "default" {
