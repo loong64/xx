@@ -96,6 +96,11 @@ load 'assert'
   assert_equal "riscv64-unknown-linux-musl" "$(TARGETPLATFORM=linux/riscv64 XX_VENDOR=unknown xx-info triple)"
 }
 
+@test "loong64" {
+  assert_equal "loongarch64-alpine-linux-musl" "$(TARGETPLATFORM=linux/loong64 xx-info triple)"
+  assert_equal "loongarch64" "$(TARGETPLATFORM=linux/loong64 xx-info pkg-arch)"
+}
+
 @test "mips" {
   assert_equal "mips-alpine-linux-musl" "$(TARGETPLATFORM=linux/mips xx-info triple)"
   assert_equal "mips" "$(TARGETPLATFORM=linux/mips xx-info pkg-arch)"
