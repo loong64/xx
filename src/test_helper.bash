@@ -45,7 +45,7 @@ xxrun() {
         wasclang=1
       fi
       if [ "$p" = "golang" ]; then
-        p="golang-1.15"
+        p="golang-1.19"
         wasgolang=1
       fi
       set -- "$@" "$p"
@@ -63,7 +63,7 @@ xxrun() {
     fi
   fi
   if [ -n "$wasgolang" ] && ! command -v go 2>/dev/null >/dev/null; then
-    ln -s /usr/lib/go-1.15/bin/go /usr/bin/go
+    ln -s /usr/lib/go-1.19/bin/go /usr/bin/go
   fi
 }
 
@@ -87,6 +87,19 @@ supportRiscV() {
   return 0
 }
 
+supportLoongArch() {
+  case "$(. /etc/os-release; echo "$ID")" in
+    debian)
+      if [  "$(cut -d. -f 1 /etc/debian_version)" -lt 13 ]; then
+        return 1
+      else
+        return 0
+      fi
+      ;;
+  esac
+  return 0
+}
+
 versionGTE() { test "$(printf '%s\n' "$@" | sort -V | tail -n 1)" = "$1"; }
 
 supportRiscVGo() {
@@ -98,6 +111,17 @@ supportRiscVCGo() {
     return 1
   fi
   versionGTE "$(go version | awk '{print $3}' | sed 's/^go//')" "1.16"
+}
+
+supportLoong64Go() {
+  versionGTE "$(go version | awk '{print $3}' | sed 's/^go//')" "1.19"
+}
+
+supportLoong64CGo() {
+  if ! supportLoongArch; then
+    return 1
+  fi
+  versionGTE "$(go version | awk '{print $3}' | sed 's/^go//')" "1.19"
 }
 
 supportAmd64VariantGo() {
