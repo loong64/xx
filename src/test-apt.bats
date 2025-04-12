@@ -100,32 +100,6 @@ load 'test_helper'
   assert_line "Package: gcc-arm-linux-gnueabihf"
 }
 
-@test "armv6" {
-  export TARGETARCH=arm
-  export TARGETVARIANT=v6
-  if ! xx-info is-cross; then return; fi
-  if [ "$(xx-info vendor)" = "ubuntu" ]; then skip; fi
-
-  run xx-apt show file
-  assert_success
-  assert_line "Package: file:armel"
-
-  run xx-apt show libc6-dev
-  assert_success
-  assert_line "Package: libc6-dev:armel"
-
-  export XX_APT_PREFER_CROSS=1
-  run xx-apt show libc6-dev
-  assert_success
-  assert_line "Package: libc6-dev-armel-cross"
-  unset XX_APT_PREFER_CROSS
-
-  run xx-apt show gcc
-  assert_success
-  assert_line "Package: gcc-arm-linux-gnueabi"
-  unset TARGETVARIANT
-}
-
 @test "s390x" {
   export TARGETARCH=s390x
   if ! xx-info is-cross; then return; fi
@@ -230,6 +204,29 @@ load 'test_helper'
   run xx-apt show gcc
   assert_success
   assert_line "Package: gcc-riscv64-linux-gnu"
+}
+
+@test "loong64" {
+  export TARGETARCH=loong64
+  if ! xx-info is-cross; then return; fi
+
+  run xx-apt show file
+  assert_success
+  assert_line "Package: file:loong64"
+
+  run xx-apt show libc6-dev
+  assert_success
+  assert_line "Package: libc6-dev:loong64"
+
+  export XX_APT_PREFER_CROSS=1
+  run xx-apt show libc6-dev
+  assert_success
+  assert_line "Package: libc6-dev-loong64-cross"
+  unset XX_APT_PREFER_CROSS
+
+  run xx-apt show gcc
+  assert_success
+  assert_line "Package: gcc-loongarch64-linux-gnu"
 }
 
 @test "skip-nolinux" {

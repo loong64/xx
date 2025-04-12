@@ -87,17 +87,6 @@ supportRiscV() {
   return 0
 }
 
-supportLoongArch() {
-  if [ -f /etc/debian_version ]; then
-    if grep "sid main" /etc/apt/sources.list 2>/dev/null >/dev/null; then
-      return 0
-    else
-      return 1
-    fi
-  fi
-  return 0
-}
-
 versionGTE() { test "$(printf '%s\n' "$@" | sort -V | tail -n 1)" = "$1"; }
 
 supportRiscVGo() {
@@ -123,20 +112,6 @@ supportMipsBuildGo() {
 
 supportWindowsArm64Go() {
   versionGTE "$(go version | awk '{print $3}' | sed 's/^go//')" "1.17"
-}
-
-supportLoong64Go() {
-  versionGTE "$(go version | awk '{print $3}' | sed 's/^go//')" "1.19"
-}
-
-supportLoong64CGo() {
-  if ! supportLoongArch; then
-    return 1
-  fi
-  if ! supportLoong64Go; then
-    return 1
-  fi
-  return 0
 }
 
 supportRC() {

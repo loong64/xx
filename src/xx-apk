@@ -61,8 +61,8 @@ setup() {
   fi
   # loong64 supported since alpine 3.21
   if [ "$TARGETARCH" = "loong64" ] && ! supportLoong64; then
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.21/main" >"$apk_dir/repositories"
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.21/community" >>"$apk_dir/repositories"
+    echo >&2 "skipping packages installation on ${XX_ARCH}. loong64 requires alpine 3.21+"
+    exit 0
   fi
   mkdir -p "$apk_dir/keys"
   mkdir -p "$apk_dir/protected_paths.d"

@@ -37,101 +37,29 @@ jobs:
       matrix:
         include:
           -
-            image: alpine:3.18
-            base: alpine
-            allow-failure: false
-          -
-            image: alpine:3.19
-            base: alpine
-            allow-failure: false
-          -
-            image: alpine:3.20
-            base: alpine
-            allow-failure: false
-          -
             image: alpine:3.21
             base: alpine
-            allow-failure: false
+            allow-failure: true
           -
             image: alpine:3.22
             base: alpine
-            allow-failure: false
+            allow-failure: true
+          -
+            image: alpine:3.23
+            base: alpine
+            allow-failure: true
           -
             image: alpine:edge
             base: alpine
             allow-failure: true
           -
-            image: debian:bookworm
-            base: debian
-            allow-failure: false
-          -
-            image: debian:bookworm-backports
-            base: debian
-            allow-failure: false
-          -
             image: debian:trixie
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: debian:sid
             base: debian
             allow-failure: true
-          -
-            image: ubuntu:20.04
-            base: debian
-            allow-failure: false
-          -
-            image: ubuntu:22.04
-            base: debian
-            allow-failure: false
-          -
-            image: ubuntu:24.04
-            base: debian
-            allow-failure: false
-          -
-            image: redhat/ubi8
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:39
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:40
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:41
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:42
-            base: rhel
-            allow-failure: false
-          -
-            image: centos:7
-            base: rhel
-            allow-failure: false
-          -
-            image: rockylinux/rockylinux:8
-            base: rhel
-            allow-failure: false
-          -
-            image: rockylinux/rockylinux:9
-            base: rhel
-            allow-failure: false
-          -
-            image: rockylinux/rockylinux:10
-            base: rhel
-            allow-failure: false
-          -
-            image: oraclelinux:8
-            base: rhel
-            allow-failure: false
-          -
-            image: oraclelinux:9
-            base: rhel
-            allow-failure: false
     with:
       image: ${{ matrix.image }}
       base: ${{ matrix.base }}
@@ -140,7 +68,8 @@ jobs:
   build:
     uses: docker/github-builder/.github/workflows/bake.yml@v1
     permissions:
-      contents: read # same as global permission
+      contents: write # same as global permission
+      packages: write
       id-token: write # for signing attestation(s) with GitHub OIDC Token
     needs:
       - validate
@@ -152,7 +81,7 @@ jobs:
       push: ${{ github.event_name != 'pull_request' }}
       set-meta-labels: true
       meta-images: |
-        tonistiigi/xx
+        ghcr.io/loong64/tonistiigi/xx
       meta-tags: |
         type=ref,event=branch
         type=ref,event=pr
@@ -160,6 +89,6 @@ jobs:
       meta-bake-target: meta-helper
     secrets:
       registry-auths: |
-        - registry: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}

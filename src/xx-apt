@@ -89,6 +89,22 @@ case "${TARGETARCH}" in
       esac
     fi
     ;;
+  loong*)
+    if [ -z "$XX_APT_FORCE_LOONG64" ]; then
+      case "${XX_VENDOR}" in
+        debian)
+          if [ "$(cut -d. -f 1 /etc/debian_version)" -lt 13 ]; then
+            echo >&2 "skipping packages installation on ${XX_ARCH}. loong64 requires debian 13+"
+            exit 0
+          fi
+          ;;
+        ubuntu)
+          echo >&2 "skipping packages installation on ${XX_ARCH}"
+          exit 0
+          ;;
+      esac
+    fi
+    ;;
   *) ;;
 esac
 
@@ -198,10 +214,14 @@ if ! xx-info is-cross; then
   nocross=1
 fi
 
-if [ "$TARGETARCH" = "riscv64" ] && [ "$(xx-info vendor)" = "debian" ]; then
-  apt-get update
-  apt-get install -y debian-ports-archive-keyring
-  echo "deb [ arch=riscv64 ] http://ftp.ports.debian.org/debian-ports sid main" >>/etc/apt/sources.list.d/riscv64-sid.list
+if [ "$TARGETARCH" = "loong64" ] && [ "$(xx-info vendor)" = "debian" ]; then
+  if [ "$(xx-info os-version)" = "13" ]; then
+    if ! grep -q "http://mirrors.loong64.com" /etc/apt/sources.list.d/debian.sources; then
+      echo "deb [ arch=loong64 ] http://mirrors.loong64.com/debian trixie main" >>/etc/apt/sources.list.d/loong64.list
+      apt-get update -o Acquire::AllowInsecureRepositories=true
+      apt-get install -y --allow-unauthenticated debian-loong64-non-official-archive-keyring
+    fi
+  fi
 fi
 
 if ! dpkg --print-foreign-architectures | grep "$XX_PKG_ARCH" >/dev/null; then
@@ -230,7 +250,7 @@ if [ "$XX_OS" = "windows" ]; then
   esac
 fi
 
-gccvers="12 11 10 9"
+gccvers="14 13 12 11 10 9"
 packages2=
 for p in ${packages}; do
   if [ "${p}" = "xx-c-essentials" ]; then
