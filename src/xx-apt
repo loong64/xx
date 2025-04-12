@@ -74,7 +74,7 @@ case "${TARGETARCH}" in
   riscv*)
     case "${XX_VENDOR}" in
       debian)
-        if ! grep "sid main" "$(aptsourcesfile)" >/dev/null; then
+        if ! grep "sid" "$(aptsourcesfile)" >/dev/null; then
           echo >&2 "skipping packages installation on ${XX_ARCH}. riscv64 currently only supported on sid"
           exit 0
         fi
@@ -84,6 +84,20 @@ case "${TARGETARCH}" in
           echo >&2 "skipping packages installation on ${XX_ARCH}. riscv64 requires 20.04+"
           exit 0
         fi
+        ;;
+    esac
+    ;;
+  loong*)
+    case "${XX_VENDOR}" in
+      debian)
+        if ! grep "sid" "$(aptsourcesfile)" >/dev/null; then
+          echo >&2 "skipping packages installation on ${XX_ARCH}. loong64 currently only supported on sid"
+          exit 0
+        fi
+        ;;
+      ubuntu)
+        echo >&2 "skipping packages installation on ${XX_ARCH}"
+        exit 0
         ;;
     esac
     ;;
@@ -201,6 +215,12 @@ if [ "$TARGETARCH" = "riscv64" ] && [ "$(xx-info vendor)" = "debian" ]; then
   apt-get update
   apt-get install -y debian-ports-archive-keyring
   echo "deb [ arch=riscv64 ] http://ftp.ports.debian.org/debian-ports sid main" >>/etc/apt/sources.list.d/riscv64-sid.list
+fi
+
+if [ "$TARGETARCH" = "loong64" ] && [ "$(xx-info vendor)" = "debian" ]; then
+  apt-get update
+  apt-get install -y debian-ports-archive-keyring
+  echo "deb [ arch=loong64 ] http://ftp.ports.debian.org/debian-ports sid main" >>/etc/apt/sources.list.d/loong64-sid.list
 fi
 
 if ! dpkg --print-foreign-architectures | grep "$XX_PKG_ARCH" >/dev/null; then

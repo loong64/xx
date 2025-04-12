@@ -5,28 +5,12 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  schedule:
-    - cron: '0 8 */6 * *' # every 6 days
   workflow_dispatch:
     inputs:
       release:
         description: 'Create GitHub Release'
         required: false
         type: boolean
-  push:
-    branches:
-      - 'master'
-    tags:
-      - 'v*'
-    paths:
-      - '.github/workflows/ld.yml'
-      - 'src/ld/**'
-      - 'docker-bake.hcl'
-  pull_request:
-    paths:
-      - '.github/workflows/ld.yml'
-      - 'src/ld/**'
-      - 'docker-bake.hcl'
 
 jobs:
   binutils-targets:
