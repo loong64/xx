@@ -9,9 +9,9 @@ ARG LIBDISPATCH_VERSION=swift-5.9.2-RELEASE
 ARG APORTS_VERSION=3.21-stable
 ARG BINUTILS_VERSION=2.43.1
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+FROM --platform=${BUILDPLATFORM} ghcr.io/loong64/xx AS xx
 
-FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS libtapi-base
+FROM --platform=${BUILDPLATFORM} registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS libtapi-base
 RUN apk add --no-cache git clang lld cmake make python3 bash
 COPY --link --from=xx / /
 ARG LIBTAPI_VERSION
@@ -19,10 +19,12 @@ WORKDIR /work
 ADD "https://github.com/tpoechtrager/apple-libtapi.git#${LIBTAPI_VERSION}" apple-libtapi
 WORKDIR apple-libtapi
 RUN --mount=target=/tmp/libtapi-cmake-args.patch,source=libtapi-cmake-args.patch \
-    git apply /tmp/libtapi-cmake-args.patch
+    --mount=target=/tmp/libtapi-cmake-loongarch-support.patch,source=libtapi-cmake-loongarch-support.patch \
+    git apply /tmp/*.patch
 RUN apk add --no-cache gcc g++
 RUN <<EOT
   set -ex
+  wget -O src/llvm/cmake/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess'
   NOMAKE=1 CMAKE_EXTRA_ARGS="$(xx-clang --print-cmake-defines) -DCMAKE_CXX_FLAGS=-D_LARGEFILE64_SOURCE" ./build.sh
   cd build
   make -j $(nproc) clang-tblgen llvm-tblgen
@@ -59,7 +61,7 @@ RUN <<EOT
   rm -rf build
 EOT
 
-FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS aports
+FROM --platform=$BUILDPLATFORM registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS aports
 RUN apk add git
 WORKDIR /work
 ARG APORTS_VERSION
@@ -72,7 +74,7 @@ FROM scratch AS patches-libdispatch
 COPY --from=aports /work/aports/community/libdispatch/*.patch /
 
 # libdispatch is needed because alpine does not provide static library in apk
-FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS libdispatch-base
+FROM --platform=${BUILDPLATFORM} registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS libdispatch-base
 RUN apk add git clang lld cmake samurai patch
 ARG LIBDISPATCH_VERSION
 COPY --link --from=xx / /
@@ -95,7 +97,7 @@ RUN ls -l /out/libdispatch/lib && [ -f /out/libdispatch/lib/libdispatch.a ] && [
 FROM scratch AS libdispatch
 COPY --from=libdispatch-base /out/libdispatch/lib/*.a /lib/
 
-FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS cctools-base
+FROM --platform=${BUILDPLATFORM} registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS cctools-base
 RUN apk add --no-cache git clang lld make llvm llvm-dev libdispatch-dev
 COPY --link --from=xx / /
 WORKDIR /work
@@ -147,7 +149,7 @@ RUN --mount=from=libtapi-static,source=/opt/libtapi,target=/opt/libtapi <<EOT
   make -j $(nproc) -C ld64
   xx-verify --static ld64/src/ld/ld
 EOT
-FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS sigtool-base
+FROM --platform=${BUILDPLATFORM} registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS sigtool-base
 RUN apk add --no-cache git clang lld cmake make pkgconf
 COPY --from=xx / /
 WORKDIR /work
@@ -185,7 +187,7 @@ COPY --link --from=ld64-static / /
 COPY --link --from=codesign-static / /
 COPY ld64.signed /
 
-FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS ld64-tgz-build
+FROM --platform=$BUILDPLATFORM registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS ld64-tgz-build
 WORKDIR /work
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN --mount=from=ld64-signed-static \
@@ -214,13 +216,13 @@ COPY --link --from=libtapi /opt/libtapi/lib/*.so /usr/lib/
 COPY --link --from=cctools-build /opt/cctools /usr
 
 
-FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS binutils-base0
+FROM --platform=$BUILDPLATFORM registry.alpinelinux.org/img/alpine:${ALPINE_VERSION} AS binutils-base0
 RUN apk add --no-cache file git clang lld linux-headers zlib-dev zstd-dev gcc patch make musl-dev musl-libintl bison flex texinfo
 WORKDIR /work
 COPY --link --from=xx / /
 COPY --link --from=patches-binutils / patches/
 ARG BINUTILS_VERSION
-RUN wget https://sourceware.org/pub/binutils/releases/binutils-${BINUTILS_VERSION}.tar.gz
+RUN wget https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
 ARG TARGETPLATFORM
 # first build version for current architecture that is used then cross compiling
 RUN <<EOT
@@ -318,7 +320,6 @@ RUN <<EOT
     --target=$(TARGETPLATFORM= TARGETPAIR=$BINUTILS_TARGET xx-info) \
     --host=$(xx-clang --print-target-triple) \
     --disable-nls \
-    --enable-gold \
     --enable-relro \
     --enable-plugins \
     --with-pic \

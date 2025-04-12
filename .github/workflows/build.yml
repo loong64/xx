@@ -7,13 +7,8 @@ concurrency:
 on:
   workflow_dispatch:
   push:
-    branches:
-      - 'master'
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - 'master'
 
 jobs:
   validate:
@@ -33,101 +28,13 @@ jobs:
       matrix:
         include:
           -
-            image: alpine:3.17
-            base: alpine
-            allow-failure: false
-          -
-            image: alpine:3.18
-            base: alpine
-            allow-failure: false
-          -
-            image: alpine:3.19
-            base: alpine
-            allow-failure: false
-          -
-            image: alpine:3.20
-            base: alpine
-            allow-failure: false
-          -
             image: alpine:3.21
             base: alpine
             allow-failure: false
           -
-            image: alpine:edge
-            base: alpine
-            allow-failure: true
-          -
-            image: debian:bullseye-backports
-            base: debian
-            allow-failure: true
-          -
-            image: debian:bookworm
-            base: debian
-            allow-failure: false
-          -
-            image: debian:bookworm-backports
-            base: debian
-            allow-failure: false
-          -
             image: debian:trixie
             base: debian
-            allow-failure: false
-          -
-            image: debian:sid
-            base: debian
             allow-failure: true
-          -
-            image: ubuntu:20.04
-            base: debian
-            allow-failure: false
-          -
-            image: ubuntu:22.04
-            base: debian
-            allow-failure: false
-          -
-            image: ubuntu:24.04
-            base: debian
-            allow-failure: false
-          -
-            image: redhat/ubi8
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:38
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:39
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:40
-            base: rhel
-            allow-failure: false
-          -
-            image: fedora:41
-            base: rhel
-            allow-failure: false
-          -
-            image: centos:7
-            base: rhel
-            allow-failure: false
-          -
-            image: rockylinux/rockylinux:8
-            base: rhel
-            allow-failure: false
-          -
-            image: rockylinux/rockylinux:9
-            base: rhel
-            allow-failure: false
-          -
-            image: oraclelinux:8
-            base: rhel
-            allow-failure: false
-          -
-            image: oraclelinux:9
-            base: rhel
-            allow-failure: false
     with:
       image: ${{ matrix.image }}
       base: ${{ matrix.base }}
@@ -140,12 +47,12 @@ jobs:
       - test
     steps:
       -
-        name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+        name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -158,7 +65,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            tonistiigi/xx
+            ghcr.io/loong64/xx
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -172,4 +79,4 @@ jobs:
             ./docker-bake.hcl
             cwd://${{ steps.meta.outputs.bake-file }}
           targets: xx-all
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
