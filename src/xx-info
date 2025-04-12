@@ -193,6 +193,9 @@ if [ -z "$TARGETARCH" ]; then
     "loong64")
       TARGETARCH="loong64"
       ;;
+    "loongarch64")
+      TARGETARCH="loong64"
+      ;;
     "mips")
       TARGETARCH="mips"
       ;;
@@ -315,10 +318,10 @@ case "$TARGETARCH" in
     XX_TRIPLE="s390x${vendor}-linux-${XX_LIBC}"
     ;;
   "loong64")
-    XX_MARCH="loong64"
+    XX_MARCH="loongarch64"
     XX_DEBIAN_ARCH="loong64"
     XX_ALPINE_ARCH="loongarch64"
-    XX_RHEL_ARCH="loong64"
+    XX_RHEL_ARCH="loongarch64"
     XX_TRIPLE="loongarch64${vendor}-linux-${XX_LIBC}"
     ;;
   "386")

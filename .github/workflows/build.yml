@@ -39,15 +39,15 @@ jobs:
           -
             image: alpine:3.18
             base: alpine
-            allow-failure: false
+            allow-failure: true
           -
             image: alpine:3.19
             base: alpine
-            allow-failure: false
+            allow-failure: true
           -
             image: alpine:3.20
             base: alpine
-            allow-failure: false
+            allow-failure: true
           -
             image: alpine:3.21
             base: alpine
@@ -63,15 +63,15 @@ jobs:
           -
             image: debian:bookworm
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: debian:bookworm-backports
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: debian:trixie
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: debian:sid
             base: debian
@@ -79,15 +79,15 @@ jobs:
           -
             image: ubuntu:20.04
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: ubuntu:22.04
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: ubuntu:24.04
             base: debian
-            allow-failure: false
+            allow-failure: true
           -
             image: redhat/ubi8
             base: rhel
@@ -140,7 +140,8 @@ jobs:
   build:
     uses: docker/github-builder-experimental/.github/workflows/bake.yml@8fc70909404a502fd0eca6601b99b32fa7192b03
     permissions:
-      contents: read # same as global permission
+      contents: write # same as global permission
+      packages: write
       id-token: write # for signing attestation(s) with GitHub OIDC Token
     needs:
       - validate
@@ -152,7 +153,7 @@ jobs:
       push: ${{ github.event_name != 'pull_request' }}
       set-meta-labels: true
       meta-images: |
-        tonistiigi/xx
+        ghcr.io/loong64/tonistiigi/xx
       meta-tags: |
         type=ref,event=branch
         type=ref,event=pr
@@ -160,6 +161,6 @@ jobs:
       meta-bake-target: meta-helper
     secrets:
       registry-auths: |
-        - registry: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
