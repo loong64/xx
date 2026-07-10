@@ -22,7 +22,7 @@ FROM scratch AS bats-src
 ARG BATS_VERSION
 ADD "https://github.com/bats-core/bats-core.git#$BATS_VERSION" .
 
-FROM --platform=$BUILDPLATFORM tonistiigi/bats-assert AS bats-assert
+FROM --platform=$BUILDPLATFORM ghcr.io/loong64/tonistiigi/bats-assert AS bats-assert
 
 FROM ${TEST_BASE_IMAGE} AS test-base-alpine
 RUN --mount=type=cache,target=/pkg-cache \

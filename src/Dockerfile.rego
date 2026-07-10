@@ -20,7 +20,7 @@ allow if {
 }
 
 allow if {
-	input.git.remote == "https://github.com/tonistiigi/xx.git"
+	input.git.remote == "https://github.com/loong64/xx.git"
 	valid_xx_ref(input.git)
 }
 
@@ -57,7 +57,7 @@ allow if {
 
 # dev helpers
 allow if {
-	input.image.repo == "tonistiigi/bats-assert"
+	input.image.repo == "ghcr.io/loong64/tonistiigi/bats-assert"
 }
 
 allow if {

@@ -9,7 +9,7 @@ ARG LIBDISPATCH_VERSION=swift-6.3.3-RELEASE
 ARG APORTS_VERSION=3.24-stable
 ARG BINUTILS_VERSION=2.47
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+FROM --platform=${BUILDPLATFORM} ghcr.io/loong64/tonistiigi/xx AS xx
 
 FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS libtapi-base
 RUN apk add --no-cache git clang lld cmake make python3 bash

@@ -307,6 +307,29 @@ EOF
   assert_line "Package: gcc-riscv64-linux-gnu"
 }
 
+@test "loong64" {
+  export TARGETARCH=loong64
+  if ! xx-info is-cross; then return; fi
+
+  run xx-apt show file
+  assert_success
+  assert_line "Package: file:loong64"
+
+  run xx-apt show libc6-dev
+  assert_success
+  assert_line "Package: libc6-dev:loong64"
+
+  export XX_APT_PREFER_CROSS=1
+  run xx-apt show libc6-dev
+  assert_success
+  assert_line "Package: libc6-dev-loong64-cross"
+  unset XX_APT_PREFER_CROSS
+
+  run xx-apt show gcc
+  assert_success
+  assert_line "Package: gcc-loongarch64-linux-gnu"
+}
+
 @test "skip-nolinux" {
   export TARGETOS="darwin"
   export TARGETARCH="amd64"

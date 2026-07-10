@@ -117,6 +117,22 @@ case "${TARGETARCH}" in
       esac
     fi
     ;;
+  loong*)
+    if [ -z "$XX_APT_FORCE_LOONG64" ]; then
+      case "${XX_VENDOR}" in
+        debian)
+          if [ "$(cut -d. -f 1 /etc/debian_version)" -lt 13 ]; then
+            echo >&2 "skipping packages installation on ${XX_ARCH}. loong64 requires debian 13+"
+            exit 0
+          fi
+          ;;
+        ubuntu)
+          echo >&2 "skipping packages installation on ${XX_ARCH}"
+          exit 0
+          ;;
+      esac
+    fi
+    ;;
   *) ;;
 esac
 
@@ -229,6 +245,23 @@ if [ "$TARGETARCH" = "riscv64" ] && [ "$(xx-info vendor)" = "debian" ] && [ "$(d
     apt-get update
     apt-get install -y debian-ports-archive-keyring
     echo "$riscv64_sid_repo" >>"$riscv64_sid_list"
+  fi
+fi
+if [ "$TARGETARCH" = "loong64" ] && [ "$(xx-info vendor)" = "debian" ] && [ "$(cut -d. -f 1 /etc/debian_version)" -eq 13 ]; then
+  loong64_trixie_list=/etc/apt/sources.list.d/loong64-trixie.list
+  loong64_trixie_repo="deb [ arch=loong64 ] http://mirrors.loong64.com/debian trixie main"
+  if ! grep -q "http://mirrors.loong64.com" /etc/apt/sources.list.d/debian.sources; then
+    echo "$loong64_trixie_repo" >>"$loong64_trixie_list"
+    apt-get update -o Acquire::AllowInsecureRepositories=true
+    apt-get install -y --allow-unauthenticated debian-loong64-non-official-archive-keyring
+  fi
+elif [ "$TARGETARCH" = "loong64" ] && [ "$(xx-info vendor)" = "debian" ] && [ "$(cut -d. -f 1 /etc/debian_version)" -lt 13 ]; then
+  loong64_sid_list=/etc/apt/sources.list.d/loong64-sid.list
+  loong64_sid_repo="deb [ arch=loong64 ] http://ftp.ports.debian.org/debian-ports sid main"
+  if ! grep -Fx "$loong64_sid_repo" "$loong64_sid_list" >/dev/null 2>&1; then
+    apt-get update
+    apt-get install -y debian-ports-archive-keyring
+    echo "$loong64_sid_repo" >>"$loong64_sid_list"
   fi
 fi
 

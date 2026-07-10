@@ -21,7 +21,7 @@ RUN echo 'source "$(dirname "${BASH_SOURCE[0]}")/bats-support/load.bash"' > /out
 FROM scratch AS release
 COPY --from=build /out /
 
-FROM alpine:${ALPINE_VERSION} AS test-gen
+FROM ghcr.io/loong64/alpine:${ALPINE_VERSION} AS test-gen
 RUN apk add --no-cache bats
 WORKDIR /work
 COPY --from=release . .
